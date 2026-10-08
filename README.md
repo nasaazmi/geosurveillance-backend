@@ -1,22 +1,32 @@
-# GeoSurveillance API (skeleton)
+# GeoSurveillance Backend
 
-Struktur awal backend FastAPI untuk proyek GeoSurveillance.
+Backend API untuk dashboard persebaran penyakit dan bencana (FastAPI + PostgreSQL).
 
-## Menjalankan
-```
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-Lalu buka http://localhost:8000/docs untuk lihat Swagger UI (dokumentasi endpoint otomatis).
+## Cara menjalankan
+
+1. Buat dan aktifkan virtual environment:
+   python -m venv .venv
+   .venv\Scripts\activate
+
+2. Install dependency:
+   python -m pip install -r requirements.txt
+
+3. Buat database PostgreSQL bernama `geosurveillance`.
+
+4. Salin `.env.example` menjadi `.env`, lalu isi DATABASE_URL dan SECRET_KEY.
+
+5. Jalankan migrasi:
+   python -m alembic upgrade head
+
+6. Jalankan server:
+   python -m uvicorn app.main:app --reload
+
+Dokumentasi API otomatis (Swagger): http://127.0.0.1:8000/docs
 
 ## Struktur
-- app/main.py       -> entry point, daftar semua router
-- app/database.py    -> koneksi PostgreSQL
-- app/models/        -> tabel database (SQLAlchemy)
-- app/schemas/        -> bentuk request/response (Pydantic)
-- app/routers/        -> definisi endpoint per fitur
-- app/services/        -> logic berat (processing spasial, forecasting) - masih kosong
 
-## Yang masih TODO
-Semua fungsi endpoint baru kerangka (belum ada query database & auth beneran).
-Cari komentar `# TODO` di tiap router untuk lihat apa yang perlu diisi.
+- app/routers/  : endpoint per fitur (auth, owner, project, beranda)
+- app/models/   : tabel database (SQLAlchemy)
+- app/schemas/  : bentuk request dan response (Pydantic)
+- app/core/     : keamanan (hash password, JWT)
+- alembic/      : file migrasi database
