@@ -57,6 +57,8 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.alter_column('projects', 'NAMA_SALAH', new_column_name='longitude')
+    op.add_column('projects', sa.Column('latitude', sa.Float(), nullable=True))
     op.create_index(op.f('ix_cases_id'), 'cases', ['id'], unique=False)
     # ### end Alembic commands ###
 
@@ -72,4 +74,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
     op.alter_column('users', 'username', new_column_name='full_name')
+    op.alter_column('projects', 'longitude', new_column_name='NAMA_SALAH')
+    op.drop_column('projects', 'latitude')
     # ### end Alembic commands ###

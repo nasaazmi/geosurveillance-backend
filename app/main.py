@@ -9,7 +9,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# CORS supaya frontend Next.js (beda origin) bisa akses API ini
+# CORS 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # nanti ganti ke domain frontend yang spesifik
@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Daftarkan semua router, masing-masing punya prefix & tag sendiri
+# Daftarkan semua router
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(owner.router, prefix="/owner", tags=["Owner"])
 app.include_router(project.router, prefix="/project", tags=["Project"])
