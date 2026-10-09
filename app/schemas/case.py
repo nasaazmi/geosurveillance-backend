@@ -1,7 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CaseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     wilayah: str
     provinsi: str
@@ -11,5 +13,12 @@ class CaseResponse(BaseModel):
     level_status: str
     rekomendasi: str | None
 
-    class Config:
-        from_attributes = True
+
+class UploadResponse(BaseModel):
+    project_id: int
+    nama_file: str
+    jumlah_titik: int
+    total_kasus: int
+    jumlah_merah: int
+    jumlah_hijau: int
+    ambang_merah: int
