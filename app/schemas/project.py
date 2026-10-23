@@ -47,3 +47,35 @@ class DashboardResponse(BaseModel):
     username: str | None
     total_project: int
     projects: list[ProjectResponse]
+
+class ResumeLokasi(BaseModel):
+    kategori: KategoriProject | None
+    provinsi: str | None
+    kabupaten: str | None
+    latitude: float | None
+    longitude: float | None
+    radius_km: float | None
+    lengkap: bool
+
+
+class ResumeFile(BaseModel):
+    nama_file: str | None
+    diperbarui_pada: datetime | None
+    jumlah_titik: int
+    total_kasus: int
+    jumlah_merah: int
+    jumlah_hijau: int
+    ambang_merah: int
+
+
+class ResumeResponse(BaseModel):
+    """Halaman Resume (langkah terakhir wizard) sebelum project diterbitkan."""
+
+    id: int
+    nama: str
+    deskripsi: str | None
+    status: StatusProject
+    lokasi: ResumeLokasi
+    file: ResumeFile
+    siap_terbit: bool
+    belum_lengkap: list[str]  # alasan belum bisa terbit (kosong kalau siap)

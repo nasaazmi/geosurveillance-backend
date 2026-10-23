@@ -11,7 +11,9 @@ from app.schemas.project import (
     ProjectCreate,
     ProjectLokasi,
     ProjectResponse,
+    ResumeResponse,
 )
+from app.services.ringkasan import AMBANG_MERAH, cek_kesiapan, hitung_ringkasan_data
 
 router = APIRouter()
 
@@ -93,3 +95,64 @@ def get_dashboard(
         "total_project": len(projects),
         "projects": projects,
     }
+
+@router.get("/project/{project_id}/resume", response_model=ResumeResponse)
+def get_resume(
+    project: Project = Depends(get_owned_project),
+    db: Session = Depends(get_db),
+):
+    """Langkah 4 (Resume): rangkuman profil, lokasi, dan data sebelum diterbitkan."""
+    ringkasan = hitung_ringkasan_data(db, project.id)
+    belum_lengkap = cek_kesiapan(project, ringkasan["jumlah_titik"])
+    return {
+        "id": project.id,
+        "nama": project.nama,
+        "deskripsi": project.deskripsi,
+        "status": project.status,
+        "lokasi": {
+            "kategori": project.kategori,
+            "provinsi": project.provinsi,
+            "kabupaten": project.kabupaten,
+            "latitude": project.latitude,
+            "longitude": project.longitude,
+            "radius_km": project.radius_km,
+            "lengkap": not any("Lokasi" in a for a in belum_lengkap),
+        },
+        "file": {
+            "nama_file": project.nama_file,
+            "diperbarui_pada": project.data_diperbarui_pada,
+            **ringkasan,
+            "ambang_merah": AMBANG_MERAH,
+        },
+        "siap_terbit": not belum_lengkap,
+        "belum_lengkap": belum_lengkap,
+    }
+
+
+@router.post("/project/{project_id}/publish", response_model=ProjectResponse)
+def publish_project(
+    project: Project = Depends(get_owned_project),
+    db: Session = Depends(get_db),
+):
+    """Terbitkan project: draft -> terbit. Tanpa approval, langsung tampil ke publik."""
+    if project.status == StatusProject.terbit.value:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Project sudah terbit.",
+        )
+
+    ringkasan = hitung_ringkasan_data(db, project.id)
+    belum_lengkap = cek_kesiapan(project, ringkasan["jumlah_titik"])
+    if belum_lengkap:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "pesan": "Project belum siap diterbitkan.",
+                "belum_lengkap": belum_lengkap,
+            },
+        )
+
+    project.status = StatusProject.terbit.value
+    db.commit()
+    db.refresh(project)
+    return project

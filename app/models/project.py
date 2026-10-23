@@ -39,4 +39,8 @@ class Project(Base):
         default=StatusProject.draft.value,
         server_default=StatusProject.draft.value,
     )
+
+    nama_file = Column(String, nullable=True)
+    data_diperbarui_pada = Column(DateTime(timezone=True), nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())

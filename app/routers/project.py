@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -86,6 +87,8 @@ def upload_dataset(
             for b in baris_data
         ]
     )
+    project.nama_file = nama_file
+    project.data_diperbarui_pada = datetime.now(timezone.utc)
     db.commit()
 
     jumlah_merah = sum(1 for b in baris_data if tentukan_status(b["jumlah_kasus"]) == "merah")
