@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_owned_project
 from app.database import get_db
 from app.models.case import Case
-from app.models.project import Project
+from app.models.project import Project, StatusProject
 from app.schemas.case import CaseResponse, UploadResponse
 from app.services.csv_import import (
     AMBANG_MERAH_DEFAULT,
@@ -105,5 +105,15 @@ def upload_dataset(
 
 @router.get("/{project_id}/data", response_model=List[CaseResponse])
 def get_project_data(project_id: int, db: Session = Depends(get_db)):
-    """Data titik untuk peta publik. Masih placeholder, diisi saat mengerjakan sisi masyarakat."""
-    return []
+    """Data titik untuk peta publik. Hanya untuk project yang sudah terbit."""
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id, Project.status == StatusProject.terbit.value)
+        .first()
+    )
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project tidak ditemukan atau belum terbit.",
+        )
+    return db.query(Case).filter(Case.project_id == project_id).order_by(Case.id).all()
