@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_owned_project
@@ -36,6 +37,18 @@ def create_project(
     db.refresh(project)
     return project
 
+def _samakan_jenis(db: Session, kategori, jenis: str | None) -> str | None:
+    """Kalau jenis yang sama (beda huruf besar/kecil) sudah pernah dipakai, pakai penulisan yang pertama."""
+    if not jenis:
+        return None
+    ada = (
+        db.query(Project.jenis)
+        .filter(Project.kategori == kategori, func.lower(Project.jenis) == jenis.lower())
+        .order_by(Project.id)
+        .first()
+    )
+    return ada[0] if ada else jenis
+
 
 @router.put("/project/{project_id}/lokasi", response_model=ProjectResponse)
 def set_lokasi(
@@ -47,6 +60,7 @@ def set_lokasi(
     project.kategori = data.kategori
     project.provinsi = data.provinsi
     project.kabupaten = data.kabupaten
+    project.jenis = _samakan_jenis(db, data.kategori, data.jenis)
     project.latitude = data.latitude
     project.longitude = data.longitude
     project.radius_km = data.radius_km

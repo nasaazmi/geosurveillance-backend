@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.project import KategoriProject, StatusProject
-
 
 class ProjectCreate(BaseModel):
     """Profil Proyek."""
@@ -22,9 +21,18 @@ class ProjectLokasi(BaseModel):
     kategori: KategoriProject  # "penyakit" atau "bencana"
     provinsi: str = Field(min_length=1)
     kabupaten: str = Field(min_length=1)
+    jenis: str | None = Field(default=None, max_length=50)  # bebas, opsional. Contoh: "DBD", "Cacar Monyet"
     latitude: float = Field(ge=-90, le=90)     # titik pusat hasil klik di peta
     longitude: float = Field(ge=-180, le=180)
     radius_km: float = Field(gt=0, le=500)     # radius perimeter siaga
+
+    @field_validator("jenis")
+    @classmethod
+    def rapikan_jenis(cls, v):
+        """Rapikan spasi berlebih. Teks kosong dianggap tidak diisi."""
+        if v is None:
+            return None
+        return " ".join(v.split()) or None
 
 
 class ProjectResponse(BaseModel):

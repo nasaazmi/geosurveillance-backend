@@ -30,6 +30,7 @@ class Project(Base):
     kategori = Column(Enum(KategoriProject), nullable=True)
     provinsi = Column(String, nullable=True)
     kabupaten = Column(String, nullable=True)
+    jenis = Column(String, nullable=True)
     latitude = Column(Float, nullable=True) 
     longitude = Column(Float, nullable=True)   
     radius_km = Column(Float, nullable=True)  

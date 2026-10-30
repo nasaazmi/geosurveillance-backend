@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, owner, project, beranda
+from app.routers import auth, owner, project, beranda, peta
 
 app = FastAPI(
     title="GeoSurveillance API",
@@ -23,6 +23,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(owner.router, prefix="/owner", tags=["Owner"])
 app.include_router(project.router, prefix="/project", tags=["Project"])
 app.include_router(beranda.router, prefix="/beranda", tags=["Beranda Publik"])
+app.include_router(peta.router, prefix="/peta", tags=["Peta Publik"])
 
 
 @app.get("/")
