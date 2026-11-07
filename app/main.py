@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import auth, owner, project, beranda, peta, profil
+from app.routers import auth, owner, project, beranda, peta, profil, pemodelan
+
 from app.services.avatar import UPLOAD_DIR
 app = FastAPI(
     title="GeoSurveillance API",
@@ -11,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(profil.router, prefix="/owner/profile", tags=["Profil"])
+app.include_router(pemodelan.router, prefix="/owner/project", tags=["Pemodelan & Rekomendasi"])
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")

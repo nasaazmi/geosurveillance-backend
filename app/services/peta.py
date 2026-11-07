@@ -2,6 +2,7 @@ import math
 
 LABEL_TINGKAT = {"rendah": "Rendah", "tinggi": "Tinggi"}
 
+
 def tingkat_titik(level_status: str, jumlah_kasus: int | None = None) -> str:
     """jumlah_kasus tidak dipakai lagi, dibiarkan supaya pemanggilnya tidak perlu diubah."""
     return "tinggi" if level_status == "merah" else "rendah"
@@ -10,6 +11,13 @@ def tingkat_titik(level_status: str, jumlah_kasus: int | None = None) -> str:
 def satuan_kasus(kategori: str) -> str:
     """Penyakit dihitung 'kasus', bencana dihitung 'kejadian'."""
     return "kejadian" if kategori == "bencana" else "kasus"
+
+
+def label_kategori(kategori: str | None, jenis: str | None) -> str | None:
+    """Teks kolom 'Kategori' di tabel, contoh: 'Penyakit (DBD)'."""
+    if not kategori:
+        return None
+    return f"{kategori.capitalize()} ({jenis})" if jenis else kategori.capitalize()
 
 
 def jarak_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -48,13 +56,19 @@ _TEMPLATE = {
 }
 
 
+def teks_template(kategori: str, tingkat: str, wilayah: str, jumlah_kasus: int, asal: str | None = None, jarak: float | None = None):
+    """Susun (peringatan, daftar tindakan). Kalau titik hasil penyebaran, peringatan menyebut titik asalnya."""
+    peringatan, tindakan = _TEMPLATE[(kategori, tingkat)]
+    if asal is not None and jarak is not None:
+        teks = f"{wilayah} berada {jarak:.1f} km dari {asal} yang berstatus Tinggi. Waspada penyebaran ke wilayah ini."
+    else:
+        teks = peringatan.format(wilayah=wilayah, kasus=jumlah_kasus)
+    return teks, list(tindakan)
+
+
 def buat_rekomendasi(kategori: str, tingkat: str, wilayah: str, jumlah_kasus: int, kustom: str | None) -> dict:
     """Pakai teks yang tersimpan di kolom cases.rekomendasi kalau ada, kalau tidak pakai template."""
     if kustom:
         return {"sumber": "kustom", "peringatan": kustom, "tindakan": []}
-    peringatan, tindakan = _TEMPLATE[(kategori, tingkat)]
-    return {
-        "sumber": "template",
-        "peringatan": peringatan.format(wilayah=wilayah, kasus=jumlah_kasus),
-        "tindakan": tindakan,
-    }
+    peringatan, tindakan = teks_template(kategori, tingkat, wilayah, jumlah_kasus)
+    return {"sumber": "template", "peringatan": peringatan, "tindakan": tindakan}

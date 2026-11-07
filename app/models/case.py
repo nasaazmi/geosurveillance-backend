@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
-from sqlalchemy.sql import func
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey, Float
+from sqlalchemy.sql import expression, func
 
 from app.database import Base
 
@@ -18,4 +18,6 @@ class Case(Base):
     jumlah_kasus = Column(Integer, nullable=False, default=0)
     level_status = Column(String, nullable=False, default="hijau")  # hijau/kuning/merah
     rekomendasi = Column(String, nullable=True)
+    is_propagated = Column(Boolean, nullable=False, default=False, server_default=expression.false())
+    source_case_id = Column(Integer, ForeignKey("cases.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
